@@ -15,9 +15,12 @@ TODOs:
 """
 
 
-num_files = int(sys.argv[1])  # Number of garbage files
-garbage_len = int(sys.argv[2])  # Length of garbage content in each file
-pr_count = int(sys.argv[3])  # Number of PRs to create
+# Number of garbage files
+num_files = 1
+# Length of garbage content in each file
+garbage_len = 100
+# Number of PRs to create
+pr_count = 1
 
 def get_random_string(length):
     """ Generate random string of fixed length """
@@ -26,7 +29,7 @@ def get_random_string(length):
     return res_str
 
 
-def create_files(num_files=1, garbage_len=100):
+def create_files():
     """ Create the garbage files in a src/ folder """
     
     # Check if dir exists
@@ -53,23 +56,42 @@ def branch_and_pr():
     try:
         br_name = get_random_string(10)
         os.system(f"git checkout -b {br_name}")
-        create_files(num_files, garbage_len)
+        create_files()
+        print(f"Created {num_files} files")
         os.system(f"git add .")
         os.system(f"git commit -m {br_name}")
-        os.system(f"git push -u origin master")
-        os.system(f"gh pr create --base master --head auto-pr:master --fill")
+        os.system(f"git push -u origin {br_name}")
+        os.system(f"gh pr create --base {br_name} --head auto-pr:master --fill")
         os.system(f"git checkout master")
         print("It works !")
     except Exception as e:
         print(e)
 
-def do_prs(pr_count):
+def do_prs():
     """ Make multiple PRs at once, without user intervention """
     for i in range(pr_count):
         branch_and_pr()
 
+def config_params():
+    print(f"How many files per commit? (defaults to 1): ")
+    temp = input()
+    if(temp != ""):
+        num_files = int(temp)
+        
+    print(f"How many characters per file? (defaults to 100): ")
+    temp = input()
+    if(temp != ""):
+        garbage_len = int(temp)
+     
+    print(f"How many PRs? (defaults to 1): ")
+    temp = input()
+    if(temp != ""):
+        pr_count = int(temp)
+    print(f"Config done...")
+
 def main():
-    do_prs(pr_count)
+    config_params()
+    do_prs()
 
 if __name__ == "__main__":
     main()
